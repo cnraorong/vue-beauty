@@ -1,6 +1,6 @@
 <template>
   <ul :class="treeCls">
-    <li v-for="(item, index) in data" :class="{[`${prefixCls}-treenode-disabled`]: item.disabled,[dropOverCls]: dragOverIndex === index,'filter-node': item.filter}" @dragover="dragover" @drop="drop(index,$event)" @dragenter="dragenter(index,$event)" @dragleave="dragleave(index,$event)" ref="node">
+    <li v-for="(item, index) in data" :key="item.clue" :class="{[`${prefixCls}-treenode-disabled`]: item.disabled,[dropOverCls]: dragOverIndex === index,'filter-node': item.filter, [item.class]: true}" @dragover="dragover" @drop="drop(index,$event)" @dragenter="dragenter(index,$event)" @dragleave="dragleave(index,$event)" ref="node">
       <span :class="[`${prefixCls}-switcher`,{[`${prefixCls}-switcher-disabled`]: item.disabled,[`${prefixCls}-switcher-noop`]: item.isLeaf,[`${prefixCls}-switcher_${item.expanded ? 'open' : 'close'}`]: !item.isLeaf}]" @click="setExpand(item.disabled, index)"></span>
       <span v-if="checkable" :class="checkboxCls(item)" @click.prevent="setCheck(item.disabled || item.disableCheckbox, index)">
         <span :class="prefixCls + '-checkbox-inner'"></span>
@@ -47,6 +47,14 @@ export default {
             type: Boolean,
             default: false,
         },
+        autoLeaf: {
+            type: Boolean,
+            default: true,
+        },
+        dragModes: {
+            type: Array,
+            default: [0,-1,1],
+        },
         canDrop: {
             type: Function,
             default: () => true,
@@ -77,6 +85,7 @@ export default {
             ];
         },
         dropOverCls() {
+            if(this.dragModes.indexOf(this.dropPosition)==-1) {return;}
             let res;
             switch (this.dropPosition) {
                 case 0:
@@ -160,26 +169,38 @@ export default {
             }
         });
         this.$on('dragdrop', (sourceClue, targetClue, dropPosition) => {
+            var args = Object.assign({}, { sourceClue, targetClue, dropPosition });
             if (this.clue !== '0') return this.dispatch('Tree', 'dragdrop', [sourceClue, targetClue, dropPosition]);
             // 直接父级是否是同一个
-            const sameTree = sourceClue.substr(0, sourceClue.length - 1) === targetClue.substr(0, targetClue.length - 1);
+            let sourceParent = "0";
+            if(sourceClue.indexOf("-")>0) {
+                sourceParent = sourceClue.substr(0, sourceClue.lastIndexOf("-"));
+            }
+            let targetParent = "0";
+            if(targetClue.indexOf("-")>0) {
+                targetParent = targetClue.substr(0, targetClue.lastIndexOf("-"));
+            }
+            const sameTree = sourceParent === targetParent;
             sourceClue = sourceClue.split('-');
-            let sourceData = this.data;
-            let _sourceData;
+            let sourceData = this.data;//顶级
+            let _sourceData; //拖动的节点Data
             let lastSourceIndex = sourceClue[sourceClue.length - 1] * 1;
             for (let i = 1; i < sourceClue.length - 1; i++) {
                 const index = sourceClue[i];
                 if (i === 1) {
-                    sourceData = sourceData[index];
+                    sourceData = sourceData[index];//第一级Item
                 } else {
-                    sourceData = sourceData.children[index];
+                    sourceData = sourceData.children[index];//第N-1级Item， soure节点的父节点Data
                 }
             }
-            if (sourceClue.length > 2) {
+            
+            //取得拖动的节点Data
+            if (sourceClue.length > 2) {//不是拖动的顶级，这时sourceData是soure节点的父节点Data
                 _sourceData = JSON.parse(JSON.stringify(sourceData.children[lastSourceIndex]));
-            } else {
+            } else {//是拖动的顶级,这时sourceData是顶级数组
                 _sourceData = JSON.parse(JSON.stringify(sourceData[lastSourceIndex]));
             }
+
 
             targetClue = targetClue.split('-');
             let targetData = this.data;
@@ -193,51 +214,60 @@ export default {
                     targetData = targetData.children[index];
                 }
             }
-            let canDrop;
-            if (targetClue.length > 2) {
-                canDrop = this.canDrop(_sourceData, targetData.children[targetIndex], dropPosition);
-            } else {
-                canDrop = this.canDrop(_sourceData, targetData[targetIndex], dropPosition);
-            }
-            if (!canDrop) return;
-
-            let sourcePositionChange = false;
-            switch (dropPosition) {
-                case 0:
-                    if (targetClue.length > 2) {
-                        targetData = targetData.children[targetIndex];
-                    } else {
-                        targetData = targetData[targetIndex];
-                    }
-                    if (targetData.children) {
-                        targetData.children.push(_sourceData);
-                    } else {
-                        this.$set(targetData, 'children', [_sourceData]);
-                    }
-                    break;
-                case 1:
-                    const p = targetIndex + (dropPosition === -1 ? 0 : dropPosition);
-                    if (targetClue.length > 2) {
-                        targetData.children.splice(p, 0, _sourceData);
-                    } else {
-                        targetData.splice(p, 0, _sourceData);
-                    }
-                    sourcePositionChange = sameTree && p <= lastSourceIndex;
-                    break;
-                case -1:
-                default:
-            }
-
-            if (sourcePositionChange) lastSourceIndex++;
-            if (sourceClue.length > 2) {
-                if (sourceData.children.length === 1) {
-                    this.$delete(sourceData, 'children');
+            args = Object.assign(args, { sourceData: _sourceData, targetData });
+            this.$emit('dragdroping', args, () => {
+                let canDrop;
+                if (targetClue.length > 2) {
+                    canDrop = this.canDrop(_sourceData, targetData.children[targetIndex], dropPosition);
                 } else {
-                    sourceData.children.splice(lastSourceIndex, 1);
+                    canDrop = this.canDrop(_sourceData, targetData[targetIndex], dropPosition);
                 }
-            } else {
-                sourceData.splice(lastSourceIndex, 1);
-            }
+                if (!canDrop) return;
+
+                let sourcePositionChange = false;
+                switch (dropPosition) {
+                    case 0://拖到目标节点里面
+                        if (targetClue.length > 2) {
+                            targetData = targetData.children[targetIndex];
+                        } else {
+                            targetData = targetData[targetIndex];
+                        }
+                        if (targetData.children) {
+                            targetData.children.push(_sourceData);
+                        } else {
+                            this.$set(targetData, 'children', [_sourceData]);
+                        }
+                        break;
+                    case 1://拖到目标节点下方
+                    case -1://拖到目标节点上方
+                        const p = targetIndex + (dropPosition === -1 ? 0 : dropPosition);
+                        if (targetClue.length > 2) {
+                            targetData.children.splice(p, 0, _sourceData);
+                        } else {
+                            targetData.splice(p, 0, _sourceData);
+                        }
+                        sourcePositionChange = sameTree && p <= lastSourceIndex;
+                        break;
+                    default:
+                }
+
+                if (sourcePositionChange) lastSourceIndex++;
+                if (sourceClue.length > 2) {
+                    if(autoLeaf) {
+                        if (sourceData.children.length === 1) {
+                            this.$delete(sourceData, 'children');
+                        } else {
+                            sourceData.children.splice(lastSourceIndex, 1);
+                        }
+                    }
+                    else {
+                        sourceData.children.splice(lastSourceIndex, 1);
+                    }
+                } else {
+                    sourceData.splice(lastSourceIndex, 1);
+                }
+                this.$emit('dragdroped', args);
+            });
         });
     },
     methods: {
