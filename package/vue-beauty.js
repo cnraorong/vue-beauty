@@ -25889,9 +25889,15 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
             type: Boolean,
             default: false
         },
+        autoLeaf: {
+            type: Boolean,
+            default: true
+        },
         dragModes: {
             type: Array,
-            default: [0, -1, 1]
+            default: function _default() {
+                return [-1, 0, 1];
+            }
         },
         canDrop: {
             type: Function,
@@ -25921,10 +25927,10 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
             return [this.prefixCls + '-child-tree', tree__defineProperty({}, this.prefixCls + '-line', this.showLine)];
         },
         dropOverCls: function dropOverCls() {
-            if (this.dragModes.indexOf(this.dropPosition) == -1) {
-                return;
-            }
             var res = void 0;
+            if (this.dragModes.indexOf(this.dropPosition) == -1) {
+                return res;
+            }
             switch (this.dropPosition) {
                 case 0:
                     res = 'drag-over';
@@ -26035,6 +26041,9 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
             }
         });
         this.$on('dragdrop', function (sourceClue, targetClue, dropPosition) {
+            if (_this.dragModes.indexOf(_this.dropPosition) == -1) {
+                return;
+            }
             var args = assign_default()({}, { sourceClue: sourceClue, targetClue: targetClue, dropPosition: dropPosition });
             if (_this.clue !== '0') return _this.dispatch('Tree', 'dragdrop', [sourceClue, targetClue, dropPosition]);
             // 直接父级是否是同一个
@@ -26122,11 +26131,15 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
 
                 if (sourcePositionChange) lastSourceIndex++;
                 if (sourceClue.length > 2) {
-                    // if (sourceData.children.length === 1) {
-                    //     this.$delete(sourceData, 'children');
-                    // } else {
-                    sourceData.children.splice(lastSourceIndex, 1); //不自动把父节点变成叶子
-                    // }
+                    if (_this.autoLeaf) {
+                        if (sourceData.children.length === 1) {
+                            _this.$delete(sourceData, 'children');
+                        } else {
+                            sourceData.children.splice(lastSourceIndex, 1);
+                        }
+                    } else {
+                        sourceData.children.splice(lastSourceIndex, 1);
+                    }
                 } else {
                     sourceData.splice(lastSourceIndex, 1);
                 }
@@ -30362,7 +30375,7 @@ if (false) {(function () {
             node.setCheck(item.disabled, route[i]);
         },
         searchFn: function searchFn(val) {
-            //console.log(val);
+            console.log(val);
         }
     }
 });

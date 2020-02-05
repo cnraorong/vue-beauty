@@ -53,7 +53,7 @@ export default {
         },
         dragModes: {
             type: Array,
-            default: [0,-1,1],
+            default: () => [-1, 0, 1],
         },
         canDrop: {
             type: Function,
@@ -85,8 +85,8 @@ export default {
             ];
         },
         dropOverCls() {
-            if(this.dragModes.indexOf(this.dropPosition)==-1) {return;}
             let res;
+            if(this.dragModes.indexOf(this.dropPosition) == -1) {return res;}
             switch (this.dropPosition) {
                 case 0:
                     res = 'drag-over';
@@ -169,6 +169,7 @@ export default {
             }
         });
         this.$on('dragdrop', (sourceClue, targetClue, dropPosition) => {
+            if(this.dragModes.indexOf(this.dropPosition) == -1) {return;}
             var args = Object.assign({}, { sourceClue, targetClue, dropPosition });
             if (this.clue !== '0') return this.dispatch('Tree', 'dragdrop', [sourceClue, targetClue, dropPosition]);
             // 直接父级是否是同一个
@@ -253,7 +254,7 @@ export default {
 
                 if (sourcePositionChange) lastSourceIndex++;
                 if (sourceClue.length > 2) {
-                    if(autoLeaf) {
+                    if(this.autoLeaf) {
                         if (sourceData.children.length === 1) {
                             this.$delete(sourceData, 'children');
                         } else {
