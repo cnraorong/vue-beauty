@@ -215,15 +215,16 @@ export default {
                     targetData = targetData.children[index];
                 }
             }
-            args = Object.assign(args, { sourceData: _sourceData, targetData });
+            let _targetData; //拖动的节点Data
+            if (targetClue.length > 2) {
+                _targetData = targetData.children[targetIndex];
+            } else {
+                _targetData = targetData[targetIndex];
+            }
+
+            args = Object.assign(args, { sourceNode: _sourceData, targetNode: _targetData });
             this.$emit('dragdroping', args, () => {
-                let canDrop;
-                if (targetClue.length > 2) {
-                    canDrop = this.canDrop(_sourceData, targetData.children[targetIndex], dropPosition);
-                } else {
-                    canDrop = this.canDrop(_sourceData, targetData[targetIndex], dropPosition);
-                }
-                if (!canDrop) return;
+                if (!this.canDrop(_sourceData, _targetData, dropPosition)) return;
 
                 let sourcePositionChange = false;
                 switch (dropPosition) {

@@ -26090,15 +26090,16 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
                     targetData = targetData.children[_index];
                 }
             }
-            args = assign_default()(args, { sourceData: _sourceData, targetData: targetData });
+            var _targetData = void 0; //拖动的节点Data
+            if (targetClue.length > 2) {
+                _targetData = targetData.children[targetIndex];
+            } else {
+                _targetData = targetData[targetIndex];
+            }
+
+            args = assign_default()(args, { sourceNode: _sourceData, targetNode: _targetData });
             _this.$emit('dragdroping', args, function () {
-                var canDrop = void 0;
-                if (targetClue.length > 2) {
-                    canDrop = _this.canDrop(_sourceData, targetData.children[targetIndex], dropPosition);
-                } else {
-                    canDrop = _this.canDrop(_sourceData, targetData[targetIndex], dropPosition);
-                }
-                if (!canDrop) return;
+                if (!_this.canDrop(_sourceData, _targetData, dropPosition)) return;
 
                 var sourcePositionChange = false;
                 switch (dropPosition) {
