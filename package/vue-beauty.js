@@ -25871,6 +25871,14 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
             type: String,
             default: '0'
         },
+        parentNode: {
+            type: Object,
+            default: undefined
+        },
+        pathPrefix: {
+            type: String,
+            default: ""
+        },
         data: {
             type: Array,
             default: function _default() {
@@ -26225,6 +26233,8 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
         },
         setKey: function setKey() {
             for (var i = 0; i < this.data.length; i++) {
+                this.data[i].fullPath = this.pathPrefix + '/' + this.data[i].title;
+                this.data[i].parentNode = this.parentNode;
                 this.data[i].clue = this.clue + '-' + i;
             }
         },
@@ -26705,6 +26715,8 @@ var tree_render = function() {
                     attrs: {
                       "prefix-cls": _vm.prefixCls,
                       data: item.children,
+                      parentNode: item,
+                      pathPrefix: item.fullPath,
                       clue: _vm.clue + "-" + index,
                       multiple: _vm.multiple,
                       checkable: _vm.checkable,

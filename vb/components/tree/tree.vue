@@ -10,7 +10,7 @@
         <span :class="prefixCls + '-title'" v-html="item.title"></span>
       </span>
       <transition name="slide-up">
-        <tree v-if="!item.isLeaf" :prefix-cls="prefixCls" :data="item.children" :clue="`${clue}-${index}`" :multiple="multiple" :checkable="checkable" :class="`${prefixCls}-child-tree-open`" v-show="item.expanded" :draggable="draggable" :async="async"></tree>
+        <tree v-if="!item.isLeaf" :prefix-cls="prefixCls" :data="item.children" :parentNode="item" :pathPrefix="item.fullPath" :clue="`${clue}-${index}`" :multiple="multiple" :checkable="checkable" :class="`${prefixCls}-child-tree-open`" v-show="item.expanded" :draggable="draggable" :async="async"></tree>
       </transition>
     </li>
   </ul>
@@ -30,6 +30,14 @@ export default {
         clue: {
             type: String,
             default: '0',
+        },
+        parentNode: {
+            type: Object,
+            default: undefined,
+        },
+        pathPrefix: {
+            type: String,
+            default: "",
         },
         data: {
             type: Array,
@@ -360,6 +368,8 @@ export default {
         },
         setKey() {
             for (let i = 0; i < this.data.length; i++) {
+                this.data[i].fullPath = `${this.pathPrefix}/${this.data[i].title}`;
+                this.data[i].parentNode = this.parentNode;
                 this.data[i].clue = `${this.clue}-${i}`;
             }
         },
