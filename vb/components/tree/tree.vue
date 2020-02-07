@@ -205,9 +205,9 @@ export default {
             
             //取得拖动的节点Data
             if (sourceClue.length > 2) {//不是拖动的顶级，这时sourceData是soure节点的父节点Data
-                _sourceData = JSON.parse(JSON.stringify(sourceData.children[lastSourceIndex]));
+                _sourceData = Object.assign({},sourceData.children[lastSourceIndex]);
             } else {//是拖动的顶级,这时sourceData是顶级数组
-                _sourceData = JSON.parse(JSON.stringify(sourceData[lastSourceIndex]));
+                _sourceData = Object.assign({},sourceData[lastSourceIndex]);
             }
 
 
@@ -399,6 +399,7 @@ export default {
             if (!disabled) {
                 const expanded = !this.data[index].expanded;
                 this.$set(this.data[index], 'expanded', expanded);
+                if(!this.data[index].children) {return;}
                 if (expanded && !this.data[index].children.length && this.async) {
                     this.$set(this.data[index], 'loading', true);
                     const data = await this.async(this.data[index]);
