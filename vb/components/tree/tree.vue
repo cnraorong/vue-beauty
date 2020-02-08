@@ -111,9 +111,13 @@ export default {
         },
     },
     watch: {
-        data() {
-            this.setKey();
-            this.preHandle();
+        data: {
+            handler(val) {
+                if(!val) {return;}
+                this.setKey();
+                this.preHandle();
+            },
+            immediate: true
         },
     },
     mounted() {
@@ -367,7 +371,7 @@ export default {
             ];
         },
         setKey() {
-            for (let i = 0; i < (this.data||[]).length; i++) {
+            for (let i = 0; i < this.data.length; i++) {
                 this.data[i].fullPath = `${this.pathPrefix}/${this.data[i].title}`;
                 this.data[i].parentNode = this.parentNode;
                 this.data[i].clue = `${this.clue}-${i}`;
