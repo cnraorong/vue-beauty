@@ -26231,7 +26231,7 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
             return [wrap, wrap + '-normal', (_ref7 = {}, tree__defineProperty(_ref7, this.prefixCls + '-node-selected', !item.disable && item.selected), tree__defineProperty(_ref7, 'draggable', this.draggable), _ref7)];
         },
         setKey: function setKey() {
-            for (var i = 0; i < this.data.length; i++) {
+            for (var i = 0; i < (this.data || []).length; i++) {
                 this.data[i].fullPath = this.pathPrefix + '/' + this.data[i].title;
                 this.data[i].parentNode = this.parentNode;
                 this.data[i].clue = this.clue + '-' + i;
