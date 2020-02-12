@@ -1,11 +1,12 @@
 <template>
   <ul :class="treeCls">
     <li v-for="(item, index) in data" :key="item.clue" :class="{[`${prefixCls}-treenode-disabled`]: item.disabled,[dropOverCls]: dragOverIndex === index,'filter-node': item.filter, [item.class]: true}" @dragover="dragover" @drop="drop(index,$event)" @dragenter="dragenter(index,$event)" @dragleave="dragleave(index,$event)" ref="node">
-      <span :class="[`${prefixCls}-switcher`,{[`${prefixCls}-switcher-disabled`]: item.disabled,[`${prefixCls}-switcher-noop`]: item.isLeaf,[`${prefixCls}-switcher_${item.expanded ? 'open' : 'close'}`]: !item.isLeaf}]" @click="setExpand(item.disabled, index)"></span>
+      <span :class="prefixCls + '-title_right'" v-if="item.titleRight" v-html="item.titleRight" style="float:right;"></span>
+      <span :style="{'background-image': item.iconUrl?('url(\''+item.iconUrl+'\')'):'', 'background-position': item.iconUrl?('21px 4px'):''}" :class="[`${prefixCls}-switcher`,{[`${prefixCls}-switcher-disabled`]: item.disabled,[`${prefixCls}-switcher-noop`]: item.isLeaf,[`${prefixCls}-switcher_${item.expanded ? 'open' : 'close'}`]: !item.isLeaf}]" @click="setExpand(item.disabled, index)"></span>
       <span v-if="checkable" :class="checkboxCls(item)" @click.prevent="setCheck(item.disabled || item.disableCheckbox, index)">
         <span :class="prefixCls + '-checkbox-inner'"></span>
       </span>
-      <span :title="item.title" :class="selectHandleCls(item)" @click.prevent="setSelect(item.disabled, index)" :draggable="draggable" @dragstart="dragstart(index,$event)" @dragend="dragend">
+      <span :title="item.tooltip||item.title" :class="selectHandleCls(item)" @click.prevent="setSelect(item.disabled, index)" :draggable="draggable" @dragstart="dragstart(index,$event)" @dragend="dragend">
         <span :class="`${prefixCls}-iconEle ${prefixCls}-icon_loading ${prefixCls}-icon__open`" v-if="item.loading"></span>
         <span :class="prefixCls + '-title'" v-html="item.title"></span>
       </span>

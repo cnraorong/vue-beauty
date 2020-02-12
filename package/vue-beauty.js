@@ -25854,6 +25854,7 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
 //
 //
 //
+//
 
 
 
@@ -26639,6 +26640,14 @@ var tree_render = function() {
           }
         },
         [
+          item.titleRight
+            ? _c("span", {
+                class: _vm.prefixCls + "-title_right",
+                staticStyle: { float: "right" },
+                domProps: { innerHTML: _vm._s(item.titleRight) }
+              })
+            : _vm._e(),
+          _vm._v(" "),
           _c("span", {
             class: [
               _vm.prefixCls + "-switcher",
@@ -26652,6 +26661,12 @@ var tree_render = function() {
               ] = !item.isLeaf),
               _obj$1)
             ],
+            style: {
+              "background-image": item.iconUrl
+                ? "url('" + item.iconUrl + "')"
+                : "",
+              "background-position": item.iconUrl ? "21px 4px" : ""
+            },
             on: {
               click: function($event) {
                 _vm.setExpand(item.disabled, index)
@@ -26679,7 +26694,10 @@ var tree_render = function() {
             "span",
             {
               class: _vm.selectHandleCls(item),
-              attrs: { title: item.title, draggable: _vm.draggable },
+              attrs: {
+                title: item.tooltip || item.title,
+                draggable: _vm.draggable
+              },
               on: {
                 click: function($event) {
                   $event.preventDefault()
