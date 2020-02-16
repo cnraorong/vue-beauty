@@ -26624,7 +26624,7 @@ var tree_render = function() {
           class: ((_obj = { "filter-node": item.filter }),
           (_obj[_vm.prefixCls + "-treenode-disabled"] = item.disabled),
           (_obj[_vm.dropOverCls] = _vm.dragOverIndex === index),
-          (_obj[item.class] = true),
+          (_obj[item.nodeClass] = true),
           _obj),
           on: {
             dragover: _vm.dragover,
