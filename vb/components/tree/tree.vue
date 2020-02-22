@@ -373,7 +373,7 @@ export default {
         },
         setKey() {
             for (let i = 0; i < this.data.length; i++) {
-                this.data[i].fullPath = `${this.pathPrefix}/${this.data[i].title}`;
+                this.data[i].fullPath = `${this.pathPrefix}>${this.data[i].title}`;
                 this.data[i].parentNode = this.parentNode;
                 this.data[i].clue = `${this.clue}-${i}`;
             }

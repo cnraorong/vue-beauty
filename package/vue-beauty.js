@@ -26240,7 +26240,7 @@ function tree__defineProperty(obj, key, value) { if (key in obj) { define_proper
         },
         setKey: function setKey() {
             for (var i = 0; i < this.data.length; i++) {
-                this.data[i].fullPath = this.pathPrefix + '/' + this.data[i].title;
+                this.data[i].fullPath = this.pathPrefix + '>' + this.data[i].title;
                 this.data[i].parentNode = this.parentNode;
                 this.data[i].clue = this.clue + '-' + i;
             }
